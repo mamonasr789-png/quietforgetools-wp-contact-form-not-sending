@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>WordPress Contact Form Not Sending Emails? Diagnostic Checklist | QuietForgeTools</title>
-  <meta name="description" content="Practical diagnostic checklist when a WordPress contact form submits but emails never arrive. Check spam, SMTP, notifications, caching, mobile, and thank-you paths — free guide from QuietForgeTools." />
+  <title>WordPress Contact Form Not Sending Email — Troubleshooting Guide | QuietForgeTools</title>
+  <meta name="description" content="Troubleshooting guide for WordPress contact forms that will not submit or submit without delivering email. Decision path plus checks for spam, SMTP, notifications, conflicts, updates, and hosting — QuietForgeTools." />
   <link rel="canonical" href="https://mamonasr789-png.github.io/quietforgetools-wp-contact-form-not-sending/" />
   <meta name="robots" content="index,follow" />
   <link rel="stylesheet" href="styles.css" />
@@ -12,19 +12,19 @@
 <body>
   <header>
     <div class="wrap">
-      <div class="brand"><a href="https://mamonasr789-png.github.io/quietforgetools/"><span>QuietForgeTools</span></a> · Free diagnostic guide</div>
+      <div class="brand"><a href="https://mamonasr789-png.github.io/quietforgetools/"><span>QuietForgeTools</span></a> · Free troubleshooting guide</div>
     </div>
   </header>
 
   <main>
     <div class="wrap hero">
       <div class="free-chip">Free guide · DIY first · no uploads</div>
-      <h1>WordPress Contact Form Not Sending Emails? Diagnostic Checklist</h1>
+      <h1>WordPress Contact Form Not Sending Email — Troubleshooting Guide</h1>
       <p class="lead">
-        Your form looks fine. Someone submits it. Nothing useful arrives in your inbox.
-        This guide walks through the checks that most often separate a real delivery failure
-        from a configuration mistake — without assuming every WordPress or email problem
-        has the same cause.
+        A contact form that “doesn’t send email” can mean two different failures:
+        the form never completes, or it completes but the notification never reaches an inbox.
+        This guide gives a short decision path and practical checks so you can narrow the cause
+        before changing production settings. It does not diagnose your site automatically.
       </p>
       <div class="callout callout-accent" role="note">
         <strong>Start here (free tool):</strong>
@@ -34,43 +34,115 @@
       </div>
     </div>
 
+    <section id="decision-path" aria-labelledby="h-decision">
+      <div class="wrap">
+        <h2 id="h-decision">Short decision path</h2>
+        <p class="section-lead">
+          Pick the branch that matches what you observe. Do not skip the distinction —
+          the form/plugin path and the mail-delivery path need different checks.
+        </p>
+        <div class="decision-list" role="list">
+          <div class="decision-item" role="listitem">
+            <div class="decision-label">FORM WILL NOT SUBMIT</div>
+            <p>→ investigate form / plugin / browser path (validation, JavaScript, caching, security blocks).</p>
+          </div>
+          <div class="decision-item" role="listitem">
+            <div class="decision-label">FORM SUBMITS BUT EMAIL MISSING</div>
+            <p>→ investigate notification / SMTP / mail delivery (recipient, spam, plugin mail settings, server mail).</p>
+          </div>
+          <div class="decision-item" role="listitem">
+            <div class="decision-label">INTERMITTENT / AFTER UPDATE</div>
+            <p>→ investigate conflict / update path (recent plugin, theme, or core changes; cache; security rules).</p>
+          </div>
+        </div>
+        <p>
+          This page does not claim automatic diagnosis. Use one unique test phrase per attempt
+          and change only one thing between tests.
+        </p>
+      </div>
+    </section>
+
     <nav class="wrap toc" aria-label="On this page">
       <h2 class="toc-title">On this page</h2>
       <ol>
-        <li><a href="#confirm-submission">Confirm the submission actually succeeds</a></li>
-        <li><a href="#spam-junk">Check spam and junk folders</a></li>
-        <li><a href="#recipient-email">Verify recipient / admin email</a></li>
+        <li><a href="#decision-path">Short decision path</a></li>
+        <li><a href="#distinguish">Distinguish form failed vs email not delivered</a></li>
+        <li><a href="#backup">Backup before modifying production</a></li>
+        <li><a href="#validation">Validation and submission errors</a></li>
+        <li><a href="#recipient-email">Recipient / admin email configuration</a></li>
+        <li><a href="#spam-junk">Spam and junk folders</a></li>
         <li><a href="#smtp-delivery">SMTP and mail delivery</a></li>
-        <li><a href="#plugin-notifications">Form plugin notifications</a></li>
-        <li><a href="#caching-security">Caching and security interference</a></li>
-        <li><a href="#mobile-browser">Mobile and browser test</a></li>
-        <li><a href="#thank-you">Confirmation / thank-you path</a></li>
+        <li><a href="#plugin-notifications">WordPress / plugin notification settings</a></li>
+        <li><a href="#caching-security">Caching, security, and plugin conflicts</a></li>
+        <li><a href="#recent-updates">Recent plugin, theme, or update changes</a></li>
+        <li><a href="#mobile-browser">Test from desktop and mobile</a></li>
+        <li><a href="#hosting-logs">When server/mail logs or hosting support may be required</a></li>
         <li><a href="#evidence">Test evidence to record</a></li>
-        <li><a href="#multi-step">When it becomes multi-step</a></li>
+        <li><a href="#next">If you want help fixing it</a></li>
       </ol>
     </nav>
 
-    <section id="confirm-submission" aria-labelledby="h-confirm">
+    <section id="distinguish" aria-labelledby="h-distinguish">
       <div class="wrap">
-        <h2 id="h-confirm">1. Confirm the submission actually succeeds</h2>
-        <p>Before blaming email, prove the form completed its request.</p>
+        <h2 id="h-distinguish">1. Distinguish “form failed” vs “form submitted but email not delivered”</h2>
+        <p>Treat these as separate problems until evidence says otherwise.</p>
         <ul>
-          <li>Submit a real test with a unique phrase in the message body (e.g. <code>TEST-2026-10-03-A</code>).</li>
-          <li>Watch for a success message, redirect, or thank-you page — not just a button click.</li>
-          <li>Open browser DevTools → Network: look for the form POST (or AJAX call). Note status code (200/302 vs 4xx/5xx).</li>
-          <li>If the request fails or never fires, the problem is the form front-end / validation / JS — not mail delivery yet.</li>
-          <li>Check the form plugin’s entries / submissions log (if it has one). A saved entry with no email is a different problem from no entry at all.</li>
+          <li><strong>Form failed:</strong> no success message, error on submit, Network request fails (4xx/5xx), or no entry appears in the form plugin log.</li>
+          <li><strong>Form submitted but email not delivered:</strong> success UI or thank-you appears, and/or an entry is saved, but the admin notification never arrives in the expected inbox (including spam).</li>
+          <li>Submit a real test with a unique phrase in the message body (e.g. <code>TEST-2026-10-04-A</code>).</li>
+          <li>Open browser DevTools → Network: note whether the form POST or AJAX call fires and its status code.</li>
+          <li>If the request fails or never fires, stay on the form/plugin/browser path — do not jump to SMTP yet.</li>
         </ul>
         <p>
-          If the form already reports success (or saves an entry) but the notification never arrives, follow the focused guide:
+          If the form already reports success (or saves an entry) but the notification never arrives, also see:
           <a href="https://mamonasr789-png.github.io/quietforgetools-wp-form-sent-no-email/">WordPress contact form says sent but no email arrives</a>.
         </p>
       </div>
     </section>
 
+    <section id="backup" aria-labelledby="h-backup">
+      <div class="wrap">
+        <h2 id="h-backup">2. Backup before modifying production</h2>
+        <p>Before disabling plugins, changing SMTP, or editing form mail templates on a live site:</p>
+        <ul>
+          <li>Take a fresh backup (files + database) or confirm a recent host backup you can restore.</li>
+          <li>Note current form notification settings, SMTP credentials location, and active plugins before you change them.</li>
+          <li>Prefer staging when available; if you must work on production, change one setting at a time and re-test with the same unique phrase.</li>
+          <li>Do not delete “old” notification rules until you have a working replacement and a recorded successful test.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="validation" aria-labelledby="h-validation">
+      <div class="wrap">
+        <h2 id="h-validation">3. Validation and submission errors</h2>
+        <p>Many “email not sending” reports are actually blocked submits.</p>
+        <ul>
+          <li>Watch for required-field, CAPTCHA, consent, or file-upload errors — including ones that only appear on mobile.</li>
+          <li>Confirm JavaScript loads (theme/plugin conflicts can break the submit handler while the button still looks clickable).</li>
+          <li>Check the form plugin’s entries / submissions log. No entry usually means the submit never completed; a saved entry with no mail points to notifications/SMTP.</li>
+          <li>If conditional logic or multi-step forms are used, confirm the final step is the one that triggers send — earlier steps may only save drafts.</li>
+          <li>Retest in a private window with extensions disabled to rule out browser blockers.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="recipient-email" aria-labelledby="h-recipient">
+      <div class="wrap">
+        <h2 id="h-recipient">4. Recipient / admin email configuration</h2>
+        <p>Wrong destination is common after migrations or staff changes.</p>
+        <ul>
+          <li>In the form plugin, confirm the notification “To” address is current and typed correctly.</li>
+          <li>Compare against Settings → General → Administration Email Address (they are not always the same).</li>
+          <li>If notifications go to a role or dynamic field, confirm that field is populated on submit.</li>
+          <li>Send a plain WordPress or host-panel mail test to the same address to separate “form config” from “mailbox rejects mail.”</li>
+        </ul>
+      </div>
+    </section>
+
     <section id="spam-junk" aria-labelledby="h-spam">
       <div class="wrap">
-        <h2 id="h-spam">2. Check spam and junk folders</h2>
+        <h2 id="h-spam">5. Spam and junk folders</h2>
         <p>Many “not sending” reports are “sent but filtered.”</p>
         <ul>
           <li>Search the recipient inbox (and any shared/team inbox) for your unique test phrase.</li>
@@ -81,25 +153,12 @@
       </div>
     </section>
 
-    <section id="recipient-email" aria-labelledby="h-recipient">
-      <div class="wrap">
-        <h2 id="h-recipient">3. Verify recipient / admin email</h2>
-        <p>Wrong destination is common after site migrations or staff changes.</p>
-        <ul>
-          <li>In the form plugin, confirm the notification “To” address is current and typed correctly.</li>
-          <li>Compare against Settings → General → Administration Email Address (they are not always the same).</li>
-          <li>If notifications go to a role or dynamic field, confirm that field is populated on submit.</li>
-          <li>Send a plain WordPress test (or host panel mail test) to the same address to separate “form config” from “mailbox rejects mail.”</li>
-        </ul>
-      </div>
-    </section>
-
     <section id="smtp-delivery" aria-labelledby="h-smtp">
       <div class="wrap">
-        <h2 id="h-smtp">4. SMTP and mail delivery</h2>
+        <h2 id="h-smtp">6. SMTP and mail delivery</h2>
         <p>Default PHP <code>mail()</code> on shared hosting is unreliable. Many hosts throttle or drop it.</p>
         <ul>
-          <li>Ask: does this site use an SMTP plugin or transactional provider (e.g. authenticated SMTP, API mailer)?</li>
+          <li>Ask: does this site use an SMTP plugin or transactional provider (authenticated SMTP or API mailer)?</li>
           <li>If SMTP is configured, open its send log / last error. Failed auth, TLS, or daily limits show up there.</li>
           <li>Confirm the From address uses a domain you control and that SPF/DKIM align for that sending service.</li>
           <li>Test sending from a different path (hosting “send test email,” or a simple SMTP test) to the same recipient.</li>
@@ -110,7 +169,7 @@
 
     <section id="plugin-notifications" aria-labelledby="h-plugin">
       <div class="wrap">
-        <h2 id="h-plugin">5. Form plugin notifications</h2>
+        <h2 id="h-plugin">7. WordPress / plugin notification settings</h2>
         <p>Contact Form 7, WPForms, Gravity Forms, Fluent Forms, and others each store mail settings differently.</p>
         <ul>
           <li>Confirm the admin notification is <strong>enabled</strong> (not only a user auto-reply).</li>
@@ -124,21 +183,35 @@
 
     <section id="caching-security" aria-labelledby="h-cache">
       <div class="wrap">
-        <h2 id="h-cache">6. Caching and security interference</h2>
-        <p>Caches and firewalls can break POST, nonces, or AJAX without an obvious UI error.</p>
+        <h2 id="h-cache">8. Caching, security, and plugin conflicts</h2>
+        <p>Caches, firewalls, and overlapping plugins can break POST, nonces, or AJAX without an obvious UI error.</p>
         <ul>
           <li>Purge page cache / CDN cache for the contact page; retest in a private window.</li>
           <li>Exclude the contact page (and <code>admin-ajax.php</code> / form endpoints) from full-page cache if your cache plugin allows it.</li>
           <li>Check security / WAF / bot protection logs for blocked form POSTs (especially after adding CAPTCHA or rate limits).</li>
-          <li>Temporarily disable one layer (cache plugin <em>or</em> firewall rule — not everything at once) and retest with the same unique phrase.</li>
+          <li>Temporarily disable one layer (cache plugin <em>or</em> one security rule — not everything at once) and retest with the same unique phrase.</li>
           <li>If the site is behind Cloudflare or similar, review Bot Fight / Managed Challenges on the form URL.</li>
+          <li>Suspect a plugin conflict when two form-related, optimization, or security plugins were recently combined — deactivate the newest one first, then re-test.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="recent-updates" aria-labelledby="h-updates">
+      <div class="wrap">
+        <h2 id="h-updates">9. Recent plugin, theme, or update changes</h2>
+        <p>Failures that started “after an update” usually belong on the conflict/update path.</p>
+        <ul>
+          <li>List what changed in the last successful-to-failed window: WordPress core, form plugin, SMTP plugin, theme, security, cache, or host PHP version.</li>
+          <li>Read the form and SMTP plugin changelogs for mail-tag, REST, or nonce changes.</li>
+          <li>If a theme update restyled the contact page, confirm the form shortcode/block is still present and not duplicated inside a cached template.</li>
+          <li>Roll forward carefully: restore from backup or revert the single newest change, re-test, then update again with a plan — do not stack untested updates.</li>
         </ul>
       </div>
     </section>
 
     <section id="mobile-browser" aria-labelledby="h-mobile">
       <div class="wrap">
-        <h2 id="h-mobile">7. Mobile and browser test</h2>
+        <h2 id="h-mobile">10. Test from desktop and mobile</h2>
         <p>Some failures only appear on phone layouts or specific browsers.</p>
         <ul>
           <li>Repeat the same unique-phrase test on a phone (real device) and on desktop.</li>
@@ -146,33 +219,41 @@
           <li>On mobile, confirm required fields, consent checkboxes, and sticky headers are not covering the submit control.</li>
           <li>If desktop works and mobile fails (or vice versa), note viewport, browser, and whether the Network request differs.</li>
         </ul>
+        <p>
+          If the visitor already sees success or thank-you but your business still cannot find the enquiry
+          (entries, mail, spam, or CRM), see:
+          <a href="https://mamonasr789-png.github.io/quietforgetools-wp-form-submitted-no-enquiry/">WordPress contact form says submitted but no enquiry received</a>.
+        </p>
       </div>
     </section>
 
-    <section id="thank-you" aria-labelledby="h-thanks">
+    <section id="hosting-logs" aria-labelledby="h-hosting">
       <div class="wrap">
-        <h2 id="h-thanks">8. Confirmation / thank-you path</h2>
-        <p>A “broken form” report sometimes means the visitor never saw confirmation — even when mail worked.</p>
+        <h2 id="h-hosting">11. When server/mail logs or hosting support may be required</h2>
+        <p>
+          DIY checks above cover most configuration mistakes. Escalate to server/mail logs or hosting support when:
+        </p>
         <ul>
-          <li>Confirm what should happen on success: inline message, redirect URL, or both.</li>
-          <li>Open the thank-you / success URL directly; check for 404, wrong language version, or cached stale page.</li>
-          <li>If redirect depends on a query parameter or form ID, verify it still matches after a redesign.</li>
-          <li>For multi-step or booking-style forms, confirm the final step is the one that triggers notification — earlier steps may only save drafts.</li>
+          <li>Submission succeeds and entries save, but no provider (SMTP plugin, transactional mailer, or host mail) shows an accepted send.</li>
+          <li>SMTP auth succeeds in the plugin UI, yet remote logs show rejects, greylisting, or daily send limits.</li>
+          <li>You need access to mail queue, exim/postfix logs, or blocked outbound port 25/465/587 — typically host-only.</li>
+          <li>PHP fatals, 500s on <code>admin-ajax.php</code>, or WAF blocks appear only in server logs, not in the browser.</li>
+          <li>SPF/DKIM/DMARC must be fixed at DNS for the sending domain and you lack DNS control.</li>
         </ul>
         <p>
-          If the visitor already sees success or thank-you but your business still cannot find the enquiry
-          (entries, mail, spam, or CRM), use the focused guide:
-          <a href="https://mamonasr789-png.github.io/quietforgetools-wp-form-submitted-no-enquiry/">WordPress contact form says submitted but no enquiry received</a>.
+          Bring your unique test phrase, timestamps (with timezone), form URL, and any SMTP error string —
+          support can search logs faster with that evidence.
         </p>
       </div>
     </section>
 
     <section id="evidence" aria-labelledby="h-evidence">
       <div class="wrap">
-        <h2 id="h-evidence">9. Test evidence to record</h2>
+        <h2 id="h-evidence">12. Test evidence to record</h2>
         <p>Clear notes turn a vague “emails don’t work” into something fixable.</p>
         <ul>
           <li>Date/time (with timezone), page URL, device, browser.</li>
+          <li>Which decision-path branch you followed (will not submit / submits but email missing / intermittent after update).</li>
           <li>Unique message phrase used in the test.</li>
           <li>Whether the UI showed success; Network status for the submit request.</li>
           <li>Whether an entry appeared in the form plugin log.</li>
@@ -184,27 +265,6 @@
           Tip: mark the same items in the
           <a href="https://mamonasr789-png.github.io/quietforgetools-wp-enquiry-checklist/">free Enquiry Path Checklist</a>
           and copy the summary for your records or for a developer.
-        </p>
-      </div>
-    </section>
-
-    <section id="multi-step" aria-labelledby="h-multi">
-      <div class="wrap">
-        <h2 id="h-multi">10. When it becomes multi-step rather than a simple fix</h2>
-        <p>
-          A single wrong recipient, disabled notification, or spam-folder hit is often a short fix.
-          It is usually <strong>not</strong> a one-shot tweak when several of these are true:
-        </p>
-        <ul>
-          <li>Submission succeeds and entries save, but mail is inconsistent across recipients or time.</li>
-          <li>SMTP, DNS (SPF/DKIM), and plugin notifications all need coordinated changes.</li>
-          <li>The path spans multiple steps, conditional fields, CRM/webhooks, or separate confirmation pages.</li>
-          <li>Caching/CDN/WAF changes fix one device but break another.</li>
-          <li>You cannot reproduce reliably enough to verify a single change.</li>
-        </ul>
-        <p>
-          At that point, treat it as an enquiry-path repair problem: map the full path, fix the agreed defect,
-          and re-test with recorded evidence — not a guess-and-hope inbox refresh.
         </p>
       </div>
     </section>
@@ -244,7 +304,7 @@
 
   <footer>
     <div class="wrap">
-      <p><a href="https://mamonasr789-png.github.io/quietforgetools/">QuietForgeTools</a> · WordPress contact form diagnostic guide · free</p>
+      <p><a href="https://mamonasr789-png.github.io/quietforgetools/">QuietForgeTools</a> · WordPress contact form troubleshooting guide · free</p>
       <p class="foot-note">
         Related:
         <a href="https://mamonasr789-png.github.io/quietforgetools-wp-enquiry-checklist/">Free checklist</a>
@@ -252,7 +312,7 @@
         <a href="https://mamonasr789-png.github.io/quietforgetools-wp-maintenance/quick-fix/">Quick Fix (£49)</a>
         ·
         <a href="https://mamonasr789-png.github.io/quietforgetools-enquiry-repair/">Enquiry Path Repair (£149)</a>.
-        This guide does not claim every WordPress or email problem has these causes.
+        This guide does not claim every WordPress or email problem has these causes, and it does not diagnose sites automatically.
       </p>
     </div>
   </footer>
